@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic ROI Analyzer | Adam Bart Immo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        
+        /* Executive Reset for Scoped Compatibility */
+        #roi-app-root {
+            font-family: 'Inter', sans-serif !important;
+            width: 100% !important;
+            margin: 0 auto !important;
+            padding: 24px 16px !important;
+            box-sizing: border-box !important;
+            background-color: #f8fafc !important;
+            color: #1e293b !important;
+            line-height: 1.5 !important;
+        }
+
+        #roi-app-root * {
+            box-sizing: border-box !important;
+            border-color: #e2e8f0;
+        }
+
+        /* Typography Isolation */
+        #roi-app-root h1 { font-size: 1.875rem !important; font-weight: 800 !important; letter-spacing: -0.025em !important; color: #0f172a !important; margin: 0 !important; }
+        #roi-app-root h2 { font-size: 0.875rem !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; color: #64748b !important; margin: 0 !important; }
+        
+        /* Standard h3 for general cards */
+        #roi-app-root h3 { font-size: 1.125rem !important; font-weight: 700 !important; color: #1e293b !important; margin: 0 !important; }
+        
+        /* OVERRIDE: Primary Profit Metric Styling */
+        #display-profit-lift {
+            font-size: 4.25rem !important; /* Huge for impact */
+            color: #ffffff !important;    /* Bright white */
+            font-weight: 900 !important;
+            line-height: 1.1 !important;
+            letter-spacing: -0.06em !important;
+            margin: 0.5rem 0 !important;
+            display: block !important;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        #roi-app-root p { margin: 0 !important; }
+
+        /* Component Styling */
+        .glass-card {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 1.25rem !important;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+            padding: 1.5rem !important;
+        }
+
+        .input-field {
+            background: #f1f5f9 !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 0.75rem !important;
+            width: 100% !important;
+            padding: 0.625rem 1rem !important;
+            font-weight: 600 !important;
+            font-size: 0.875rem !important;
+            outline: none !important;
+            transition: all 0.2s ease;
+        }
+
+        /* Enhanced Dropdown Styling */
+        .dropdown-select {
+            background: #ffffff !important;
+            border: 2px solid #3b82f6 !important;
+            border-radius: 0.75rem !important;
+            width: 100% !important;
+            padding: 0.875rem 1rem !important;
+            font-weight: 800 !important;
+            font-size: 1rem !important;
+            color: #1e293b !important;
+            outline: none !important;
+            cursor: pointer !important;
+            appearance: none !important;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1) !important;
+        }
+
+        .input-field:focus {
+            background: #ffffff !important;
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        }
+
+        .custom-slider {
+            -webkit-appearance: none;
+            width: 100% !important;
+            height: 6px !important;
+            background: #cbd5e1 !important;
+            border-radius: 999px !important;
+            outline: none;
+        }
+
+        .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #3b82f6;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 320px !important;
+            width: 100% !important;
+        }
+
+        /* 7-Column Layout Engine */
+        .app-grid {
+            display: flex !important;
+            flex-direction: column !important;
+            width: 100% !important;
+            gap: 2rem !important;
+        }
+
+        @media (min-width: 1024px) {
+            .app-grid {
+                flex-direction: row !important;
+                align-items: flex-start !important;
+            }
+            .sidebar { width: 33% !important; flex-shrink: 0 !important; }
+            .main-dash { width: 67% !important; flex-grow: 1 !important; }
+        }
+    </style>
+</head>
+<body class="bg-transparent">
+
+<div id="roi-app-root">
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 px-2">
+        <div>
+            <div class="flex items-center gap-3 mb-2">
+                <div class="bg-blue-600 p-2.5 rounded-lg text-white">
+                    <i data-lucide="zap" class="w-6 h-6 fill-current"></i>
+                </div>
+                <h1 class="text-slate-900 tracking-tight">Agentic <span class="text-blue-600">ROI</span> Analyzer</h1>
+            </div>
+            <p class="text-slate-500 font-medium text-sm tracking-tight">Benchmark calculations for Make.com vs. Manual Lead Ops.</p>
+        </div>
+        
+        <div class="bg-blue-50 border border-blue-100 px-5 py-3.5 rounded-2xl flex items-center gap-4 shadow-sm">
+            <div class="text-right">
+                <p class="text-[10px] text-blue-600 font-bold uppercase tracking-wider">Annual Net Profit Lift</p>
+                <p id="summary-yearly-savings" class="text-2xl font-black text-blue-700 leading-none mt-1">$0</p>
+            </div>
+            <div class="h-10 w-px bg-blue-200"></div>
+            <i data-lucide="shield-check" class="text-blue-600 w-8 h-8"></i>
+        </div>
+    </header>
+
+    <div class="app-grid">
+        <!-- Sidebar Controls -->
+        <aside class="sidebar space-y-6">
+            <div class="glass-card">
+                <h2 class="mb-6 flex items-center gap-2">
+                    <i data-lucide="sliders-horizontal" class="w-4 h-4 text-blue-600"></i> Parameters
+                </h2>
+
+                <div class="space-y-5">
+                    <!-- Updated Dropdown Section with CTA -->
+                    <div class="space-y-2">
+                        <label class="block text-[11px] font-black text-blue-600 uppercase tracking-widest px-1 animate-pulse">
+                            1. Select Your Process
+                        </label>
+                        <div class="relative group">
+                            <select id="useCaseSelector" class="dropdown-select">
+                                <option value="salesOps">Sales Operations & CRM</option>
+                                <option value="finance">Financial Admin & Invoicing</option>
+                                <option value="support">Customer Support & FAQs</option>
+                            </select>
+                            <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-blue-600">
+                                <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <label id="label-volume" class="block text-[10px] font-bold text-slate-400 uppercase">Volume / Month</label>
+                            <input type="number" id="input-volume" value="400" class="input-field">
+                        </div>
+                        <div class="space-y-1.5 text-right">
+                            <label id="label-unitCost" class="block text-[10px] font-bold text-slate-400 uppercase">Unit Spend ($)</label>
+                            <input type="number" id="input-unitCost" value="200" class="input-field text-right">
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-100">
+                        <div class="flex justify-between items-center mb-4">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Manual Time / Task</label>
+                            <span id="display-minutes" class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">25m</span>
+                        </div>
+                        <input type="range" id="input-minutes" min="1" max="120" step="1" value="25" class="custom-slider">
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase">Avg. Staff Rate ($/hr)</label>
+                        <input type="number" id="input-staffRate" value="45" class="input-field font-bold">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Primary Profit Lift Card -->
+            <div class="bg-slate-900 rounded-[28px] p-10 text-white relative overflow-hidden group shadow-2xl border border-slate-800">
+                <div class="relative z-10">
+                    <p class="text-[11px] font-black uppercase tracking-[0.2em] text-blue-400 mb-2">Year 1 Performance</p>
+                    <span id="display-profit-lift">$0</span>
+                    <p class="text-[10px] text-slate-400 font-bold mb-10 uppercase tracking-widest opacity-80">Net of $8,340 Setup Fee</p>
+                    
+                    <a href="https://www.adambartimmo.com/contact-us" class="flex items-center justify-center gap-2 bg-blue-600 text-white w-full py-4.5 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg no-underline py-4">
+                        Strategic Audit <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                </div>
+                <div class="absolute -bottom-10 -right-10 w-56 h-56 bg-blue-600 rounded-full blur-[90px] opacity-25"></div>
+            </div>
+        </aside>
+
+        <!-- Main Dashboard -->
+        <main class="main-dash space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Manual Card -->
+                <div class="bg-white p-6 rounded-[20px] border-l-4 border-slate-400 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Manual (Status Quo)</span>
+                        <p id="manual-cac" class="text-3xl font-black text-slate-800 tracking-tight mt-3">$0</p>
+                        <p class="text-xs text-slate-500 font-medium">Customer Acquisition Cost</p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-50 grid grid-cols-2 gap-2 text-[10px] font-bold">
+                        <div>
+                            <p class="text-slate-400 uppercase tracking-tighter">Labor Load</p>
+                            <p id="manual-hours" class="text-slate-700">0 hrs</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-400 uppercase tracking-tighter">Total Spend</p>
+                            <p id="manual-total-monthly" class="text-slate-700">$0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Automated Card -->
+                <div class="bg-white p-6 rounded-[20px] border-l-4 border-blue-600 shadow-md relative overflow-hidden flex flex-col justify-between ring-2 ring-blue-600/5">
+                    <div class="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 text-[9px] font-black rounded-bl-xl tracking-tighter">AGENTIC ROI</div>
+                    <div>
+                        <span class="text-[10px] font-black uppercase text-blue-600 tracking-widest">Make.com Automated</span>
+                        <div class="flex items-center gap-2 mt-3">
+                            <p id="auto-cac" class="text-3xl font-black text-slate-800 tracking-tight">$0</p>
+                            <span id="reduction-pill" class="text-emerald-500 font-bold text-[9px] flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                                <i data-lucide="trending-down" class="w-3 h-3"></i> 0% REDUCTION
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-500 font-medium">Projected CAC</p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-50 grid grid-cols-2 gap-2 text-[10px] font-bold">
+                        <div>
+                            <p class="text-blue-500 uppercase tracking-tighter">Platform + Auto</p>
+                            <p id="auto-labor-monthly" class="text-blue-700">$0</p>
+                        </div>
+                        <div>
+                            <p class="text-blue-500 uppercase tracking-tighter">Mo. Savings</p>
+                            <p id="monthly-savings" class="text-emerald-600">$0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visualization -->
+            <div class="glass-card">
+                <h3 class="mb-8 flex items-center gap-2">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 text-blue-600"></i> Per-Lead Cost Stack: Manual vs. Agentic
+                </h3>
+                <div class="chart-container">
+                    <canvas id="roiChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Benchmark Logic -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                <div class="md:col-span-8 glass-card border-none bg-slate-100/50">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i data-lucide="info" class="w-4 h-4 text-blue-600"></i>
+                        <h2 class="text-[9px] font-black tracking-widest text-slate-400">Economic Benchmark</h2>
+                    </div>
+                    <p id="use-case-insight" class="text-sm font-medium leading-relaxed text-slate-600"></p>
+                </div>
+                <div class="md:col-span-4 bg-white border border-slate-200 rounded-[20px] p-6 flex flex-col justify-center items-center text-center shadow-sm">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Recaptured Time</p>
+                    <p id="recaptured-time" class="text-3xl font-black text-blue-600 tracking-tighter leading-none">0 hrs</p>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mt-1">Per Month</p>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    const SETUP_FEE = 8340;
+    const EFFORT_REDUCTION = 0.95;
+    const SALES_VELOCITY_GAIN = 0.25;
+    const PLATFORM_COST = 45;
+
+    const CONFIG = {
+        salesOps: {
+            title: "Sales Operations",
+            vLabel: "Leads / Month",
+            uLabel: "Data Tooling ($/mo)",
+            vDefault: 400, uDefault: 200, mDefault: 25,
+            efficiency: 0.95,
+            insight: "Research by McKinsey shows that up to 31% of sales activities can be automated, boosting lead productivity by 10% without increasing headcount."
+        },
+        finance: {
+            title: "Financial Admin",
+            vLabel: "Invoices / Month",
+            uLabel: "Finance Stack ($/mo)",
+            vDefault: 150, uDefault: 150, mDefault: 15,
+            efficiency: 0.98,
+            insight: "Gartner identifies that finance teams can save up to 25,000 hours of manual data entry rework annually through automation."
+        },
+        support: {
+            title: "Customer Support",
+            vLabel: "Inquiries / Month",
+            uLabel: "Support Stack ($/mo)",
+            vDefault: 800, uDefault: 300, mDefault: 12,
+            efficiency: 0.85,
+            insight: "HBR reports that AI agents can handle Tier 1 inquiries at 40% lower cost while maintaining higher customer satisfaction scores."
+        }
+    };
+
+    let roiChart;
+
+    function safeText(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+    }
+
+    function calculate() {
+        const key = document.getElementById('useCaseSelector')?.value;
+        if (!key || !CONFIG[key]) return;
+        const config = CONFIG[key];
+
+        const vol = parseFloat(document.getElementById('input-volume')?.value) || 0;
+        const cost = parseFloat(document.getElementById('input-unitCost')?.value) || 0;
+        const min = parseFloat(document.getElementById('input-minutes')?.value) || 0;
+        const rate = parseFloat(document.getElementById('input-staffRate')?.value) || 0;
+
+        safeText('display-minutes', min + 'm');
+
+        // Logic
+        const laborCostPerTask = (min / 60) * rate;
+        const manualTotalMonthly = (vol * laborCostPerTask) + cost;
+        
+        const autoLaborMonthly = (vol * laborCostPerTask) * (1 - config.efficiency);
+        const autoTotalMonthly = autoLaborMonthly + PLATFORM_COST + cost;
+
+        const monthlySavings = manualTotalMonthly - autoTotalMonthly;
+        const firstYearNetSavings = (monthlySavings * 12) - SETUP_FEE;
+        
+        const convRate = 0.08;
+        const conversions = Math.max(1, Math.round(vol * convRate));
+        const manualCAC = manualTotalMonthly / conversions;
+        const autoCAC = autoTotalMonthly / conversions;
+        const reductionPercent = Math.round(((manualCAC - autoCAC) / manualCAC) * 100);
+
+        // UI Updates
+        safeText('manual-cac', '$' + Math.round(manualCAC).toLocaleString());
+        safeText('auto-cac', '$' + Math.round(autoCAC).toLocaleString());
+        safeText('summary-yearly-savings', '$' + Math.round(monthlySavings * 12).toLocaleString());
+        safeText('display-profit-lift', '$' + Math.round(firstYearNetSavings).toLocaleString());
+        safeText('manual-total-monthly', '$' + Math.round(manualTotalMonthly).toLocaleString());
+        safeText('auto-labor-monthly', '$' + Math.round(autoLaborMonthly + PLATFORM_COST).toLocaleString());
+        safeText('monthly-savings', '$' + Math.round(monthlySavings).toLocaleString());
+        safeText('manual-hours', Math.round((min / 60) * vol) + ' hrs');
+        safeText('recaptured-time', Math.round(((min / 60) * vol) * config.efficiency) + ' hrs');
+        safeText('reduction-pill', reductionPercent + '% REDUCTION');
+        safeText('use-case-insight', config.insight);
+
+        if (roiChart) {
+            const perLeadManual = manualTotalMonthly / (vol || 1);
+            const perLeadAuto = autoTotalMonthly / (vol || 1);
+            roiChart.data.datasets[0].data = [perLeadManual * 0.4, perLeadManual * 0.1, perLeadManual * 0.5];
+            roiChart.data.datasets[1].data = [perLeadAuto * 0.4, perLeadAuto * 0.02, perLeadAuto * 0.58];
+            roiChart.update();
+        }
+    }
+
+    function switchUseCase() {
+        const selector = document.getElementById('useCaseSelector');
+        const config = CONFIG[selector.value];
+        safeText('workflow-title', config.title);
+        safeText('label-volume', config.vLabel);
+        safeText('label-unitCost', config.uLabel);
+        document.getElementById('input-volume').value = config.vDefault;
+        document.getElementById('input-unitCost').value = config.uDefault;
+        document.getElementById('input-minutes').value = config.mDefault;
+        calculate();
+    }
+
+    function init() {
+        if (!document.getElementById('roi-app-root')) return;
+        lucide.createIcons();
+
+        const ctx = document.getElementById('roiChart').getContext('2d');
+        roiChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Acquisition', 'Data Effort', 'Operational Labor'],
+                datasets: [
+                    { label: 'Current Manual', data: [0, 0, 0], backgroundColor: '#64748b', borderRadius: 6 },
+                    { label: 'Agentic Automated', data: [0, 0, 0], backgroundColor: '#3b82f6', borderRadius: 6 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { weight: 'bold', size: 10 } } } },
+                scales: {
+                    y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 9 } }, beginAtZero: true },
+                    x: { grid: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } }
+                }
+            }
+        });
+
+        document.getElementById('useCaseSelector').onchange = switchUseCase;
+        ['input-volume', 'input-unitCost', 'input-minutes', 'input-staffRate'].forEach(id => {
+            document.getElementById(id).oninput = calculate;
+        });
+
+        switchUseCase();
+    }
+
+    let attempts = 0;
+    const interval = setInterval(() => {
+        if (document.getElementById('roiChart')) {
+            init();
+            clearInterval(interval);
+        }
+        if (attempts++ > 40) clearInterval(interval);
+    }, 150);
+</script>
+
+</body>
+</html>
