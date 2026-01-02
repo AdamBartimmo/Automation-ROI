@@ -145,18 +145,37 @@
                 <div class="bg-blue-600 p-2.5 rounded-lg text-white">
                     <i data-lucide="zap" class="w-6 h-6 fill-current"></i>
                 </div>
-                <h1 class="text-slate-900 tracking-tight">Agentic <span class="text-blue-600">ROI</span> Analyzer</h1>
+                <h1 id="main-module-title" class="text-slate-900 tracking-tight">Agentic <span class="text-blue-600">ROI</span> Analyzer</h1>
             </div>
             <p class="text-slate-500 font-medium text-sm tracking-tight">Benchmark calculations for Make.com vs. Manual Lead Ops.</p>
         </div>
         
-        <div class="bg-blue-50 border border-blue-100 px-5 py-3.5 rounded-2xl flex items-center gap-4 shadow-sm">
-            <div class="text-right">
-                <p class="text-[10px] text-blue-600 font-bold uppercase tracking-wider">Annual Net Profit Lift</p>
-                <p id="summary-yearly-savings" class="text-2xl font-black text-blue-700 leading-none mt-1">$0</p>
+        <!-- Right-aligned Header Section -->
+        <div class="flex items-center gap-3">
+            <!-- Efficiency Gain Indicator -->
+            <div class="hidden sm:block text-right">
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">
+                    Potential Efficiency Gain
+                </p>
+                <div class="flex items-center gap-2 justify-end">
+                    <!-- Pulsing Status Dot -->
+                    <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <p id="header-efficiency-value" class="text-sm font-black text-emerald-600">
+                        +0% Improvement
+                    </p>
+                </div>
             </div>
-            <div class="h-10 w-px bg-blue-200"></div>
-            <i data-lucide="shield-check" class="text-blue-600 w-8 h-8"></i>
+
+            <!-- Vertical Divider -->
+            <div class="h-8 w-px bg-slate-100 mx-2 hidden sm:block"></div>
+
+            <!-- Call to Action Button -->
+            <button onclick="window.location.href='https://www.adambartimmo.com/contact-us'" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 shadow-md shadow-blue-200 active:scale-95">
+                Book Strategy Call 
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right">
+                    <path d="m9 18 6-6-6-6"/>
+                </svg>
+            </button>
         </div>
     </header>
 
@@ -169,7 +188,6 @@
                 </h2>
 
                 <div class="space-y-5">
-                    <!-- Updated Dropdown Section with CTA -->
                     <div class="space-y-2">
                         <label class="block text-[11px] font-black text-blue-600 uppercase tracking-widest px-1 animate-pulse">
                             1. Select Your Process
@@ -370,9 +388,10 @@
         const conversions = Math.max(1, Math.round(vol * convRate));
         const manualCAC = manualTotalMonthly / conversions;
         const autoCAC = autoTotalMonthly / conversions;
-        const reductionPercent = Math.round(((manualCAC - autoCAC) / manualCAC) * 100);
+        const reductionPercent = Math.round(((manualCAC - autoCAC) / manualCAC) * 100) || 0;
 
         // UI Updates
+        safeText('header-efficiency-value', '+' + reductionPercent + '% Improvement');
         safeText('manual-cac', '$' + Math.round(manualCAC).toLocaleString());
         safeText('auto-cac', '$' + Math.round(autoCAC).toLocaleString());
         safeText('summary-yearly-savings', '$' + Math.round(monthlySavings * 12).toLocaleString());
@@ -397,6 +416,11 @@
     function switchUseCase() {
         const selector = document.getElementById('useCaseSelector');
         const config = CONFIG[selector.value];
+        const mainTitle = document.getElementById('main-module-title');
+        if (mainTitle) {
+            mainTitle.innerHTML = `${config.title} <span class="text-blue-600">ROI</span> Analyzer`;
+        }
+        
         safeText('workflow-title', config.title);
         safeText('label-volume', config.vLabel);
         safeText('label-unitCost', config.uLabel);
