@@ -30,8 +30,6 @@
         /* Typography Isolation */
         #roi-app-root h1 { font-size: 1.875rem !important; font-weight: 800 !important; letter-spacing: -0.025em !important; color: #0f172a !important; margin: 0 !important; }
         #roi-app-root h2 { font-size: 0.875rem !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; color: #64748b !important; margin: 0 !important; }
-        
-        /* Standard h3 for general cards */
         #roi-app-root h3 { font-size: 1.125rem !important; font-weight: 700 !important; color: #1e293b !important; margin: 0 !important; }
         
         /* OVERRIDE: Primary Profit Metric Styling */
@@ -117,6 +115,42 @@
             width: 100% !important;
         }
 
+        /* Tooltip Style */
+        .info-tooltip {
+            visibility: hidden;
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #0f172a;
+            color: #fff;
+            text-align: center;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            white-space: nowrap;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.2s;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+        }
+
+        .info-tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #0f172a transparent transparent transparent;
+        }
+
+        .info-trigger:hover .info-tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
         /* 7-Column Layout Engine */
         .app-grid {
             display: flex !important;
@@ -145,7 +179,7 @@
                 <div class="bg-blue-600 p-2.5 rounded-lg text-white">
                     <i data-lucide="zap" class="w-6 h-6 fill-current"></i>
                 </div>
-                <h1 id="main-module-title" class="text-slate-900 tracking-tight">Agentic <span class="text-blue-600">ROI</span> Analyzer</h1>
+                <h1 id="main-module-title" class="text-slate-900 tracking-tight">Sales Operations <span class="text-blue-600">ROI</span> Analyzer</h1>
             </div>
             <p class="text-slate-500 font-medium text-sm tracking-tight">Benchmark calculations for Make.com vs. Manual Lead Ops.</p>
         </div>
@@ -188,6 +222,7 @@
                 </h2>
 
                 <div class="space-y-5">
+                    <!-- Dropdown Section -->
                     <div class="space-y-2">
                         <label class="block text-[11px] font-black text-blue-600 uppercase tracking-widest px-1 animate-pulse">
                             1. Select Your Process
@@ -206,11 +241,18 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-1.5">
-                            <label id="label-volume" class="block text-[10px] font-bold text-slate-400 uppercase">Volume / Month</label>
+                            <label id="label-volume" class="block text-[10px] font-bold text-slate-400 uppercase">Leads / Month</label>
                             <input type="number" id="input-volume" value="400" class="input-field">
                         </div>
                         <div class="space-y-1.5 text-right">
-                            <label id="label-unitCost" class="block text-[10px] font-bold text-slate-400 uppercase">Unit Spend ($)</label>
+                            <!-- Software Cost Label with Dynamic Tooltip -->
+                            <div class="flex items-center justify-end gap-1 mb-1">
+                                <label id="label-unitCost" class="block text-[10px] font-bold text-slate-400 uppercase">Software Cost ($)</label>
+                                <div class="relative info-trigger cursor-help">
+                                    <i data-lucide="info" class="w-3 h-3 text-slate-300 hover:text-blue-500 transition-colors"></i>
+                                    <span id="software-tooltip" class="info-tooltip">e.g. HubSpot, Salesforce, Pipedrive</span>
+                                </div>
+                            </div>
                             <input type="number" id="input-unitCost" value="200" class="input-field text-right">
                         </div>
                     </div>
@@ -233,14 +275,13 @@
             <!-- Primary Profit Lift Card -->
             <div class="bg-slate-900 rounded-[28px] p-10 text-white relative overflow-hidden group shadow-2xl border border-slate-800">
                 <div class="relative z-10">
-                    <p class="text-[11px] font-black uppercase tracking-[0.2em] text-blue-400 mb-2">Year 1: Financial Savings with Agentic Automation</p>
+                    <p class="text-[11px] font-black uppercase tracking-[0.2em] text-blue-400 mb-2">Year 1: Financial Impact of Agentic Automation</p>
                     <span id="display-profit-lift">$0</span>
-                    <p class="text-[10px] text-slate-400 font-bold mb-10 uppercase tracking-widest opacity-80">This includes the automation set-up and build fee</p>
+                    <p class="text-[10px] text-slate-400 font-bold mb-10 uppercase tracking-widest opacity-80 leading-relaxed">Includes average automation set-up and build fee of $8,340</p>
                     
                     <a href="https://www.adambartimmo.com/contact-us" class="flex items-center justify-center gap-2 bg-blue-600 text-white w-full py-4.5 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg no-underline py-4">
                         Start My Optimization Today <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </a>
-                    <p class="text-[8px] font-black uppercase tracking-[0.2em] text-blue-400 mb-2">*This is only an assumed estimate, ROI will be unique for each business case</p>
                 </div>
                 <div class="absolute -bottom-10 -right-10 w-56 h-56 bg-blue-600 rounded-full blur-[90px] opacity-25"></div>
             </div>
@@ -254,7 +295,7 @@
                     <div>
                         <span class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Manual (Status Quo)</span>
                         <p id="manual-cac" class="text-3xl font-black text-slate-800 tracking-tight mt-3">$0</p>
-                        <p class="text-xs text-slate-500 font-medium">Current Cost</p>
+                        <p class="text-xs text-slate-500 font-medium">Customer Acquisition Cost</p>
                     </div>
                     <div class="mt-6 pt-4 border-t border-slate-50 grid grid-cols-2 gap-2 text-[10px] font-bold">
                         <div>
@@ -279,7 +320,7 @@
                                 <i data-lucide="trending-down" class="w-3 h-3"></i> 0% REDUCTION
                             </span>
                         </div>
-                        <p class="text-xs text-slate-500 font-medium">Projected Cost</p>
+                        <p class="text-xs text-slate-500 font-medium">Projected CAC</p>
                     </div>
                     <div class="mt-6 pt-4 border-t border-slate-50 grid grid-cols-2 gap-2 text-[10px] font-bold">
                         <div>
@@ -311,7 +352,7 @@
                         <i data-lucide="info" class="w-4 h-4 text-blue-600"></i>
                         <h2 class="text-[9px] font-black tracking-widest text-slate-400">Economic Benchmark</h2>
                     </div>
-                    <p id="use-case-insight" class="text-sm font-medium leading-relaxed text-slate-600"></p>
+                    <p id="use-case-insight" class="text-sm font-medium leading-relaxed text-slate-600 italic"></p>
                 </div>
                 <div class="md:col-span-4 bg-white border border-slate-200 rounded-[20px] p-6 flex flex-col justify-center items-center text-center shadow-sm">
                     <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Recaptured Time</p>
@@ -336,7 +377,8 @@
             uLabel: "Software Cost ($/mo)",
             vDefault: 400, uDefault: 200, mDefault: 25,
             efficiency: 0.95,
-            insight: "Research by McKinsey shows that up to 31% of sales activities can be automated, boosting lead productivity by 10% without increasing headcount."
+            insight: "Research by McKinsey shows that up to 31% of sales activities can be automated, boosting lead productivity by 10% without increasing headcount.",
+            software: "e.g. HubSpot, Salesforce, Pipedrive"
         },
         finance: {
             title: "Financial Admin",
@@ -344,7 +386,8 @@
             uLabel: "Finance Software Cost ($/mo)",
             vDefault: 150, uDefault: 150, mDefault: 15,
             efficiency: 0.98,
-            insight: "Gartner identifies that finance teams can save up to 25,000 hours of manual data entry rework annually through automation."
+            insight: "Gartner identifies that finance teams can save up to 25,000 hours of manual data entry rework annually through automation.",
+            software: "e.g. QuickBooks, Xero, Sage"
         },
         support: {
             title: "Customer Support",
@@ -352,7 +395,8 @@
             uLabel: "Support Software Cost ($/mo)",
             vDefault: 800, uDefault: 300, mDefault: 12,
             efficiency: 0.85,
-            insight: "HBR reports that AI agents can handle Tier 1 inquiries at 40% lower cost while maintaining higher customer satisfaction scores."
+            insight: "HBR reports that AI agents can handle Tier 1 inquiries at 40% lower cost while maintaining higher customer satisfaction scores.",
+            software: "e.g. Zoho Desk, Zendesk, Intercom"
         }
     };
 
@@ -416,6 +460,7 @@
 
     function switchUseCase() {
         const selector = document.getElementById('useCaseSelector');
+        if (!selector) return;
         const config = CONFIG[selector.value];
         const mainTitle = document.getElementById('main-module-title');
         if (mainTitle) {
@@ -425,6 +470,8 @@
         safeText('workflow-title', config.title);
         safeText('label-volume', config.vLabel);
         safeText('label-unitCost', config.uLabel);
+        safeText('software-tooltip', config.software); // Update tooltip text
+        
         document.getElementById('input-volume').value = config.vDefault;
         document.getElementById('input-unitCost').value = config.uDefault;
         document.getElementById('input-minutes').value = config.mDefault;
@@ -441,7 +488,7 @@
             data: {
                 labels: ['Acquisition', 'Data Effort', 'Operational Labor'],
                 datasets: [
-                    { label: 'Manual', data: [0, 0, 0], backgroundColor: '#64748b', borderRadius: 6 },
+                    { label: 'Current Manual', data: [0, 0, 0], backgroundColor: '#64748b', borderRadius: 6 },
                     { label: 'Agentic Automated', data: [0, 0, 0], backgroundColor: '#3b82f6', borderRadius: 6 }
                 ]
             },
